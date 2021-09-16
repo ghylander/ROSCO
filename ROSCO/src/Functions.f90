@@ -61,8 +61,8 @@ CONTAINS
         ! Local variables
         REAL(8)                 :: rate
 
-        rate = (inputSignal - inputSignalPrev)/DT                       ! Signal rate (unsaturated)
-        rate = saturate(rate, minRate, maxRate)                 ! Saturate the signal rate
+        rate = (inputSignal - inputSignalPrev)/DT                   ! Signal rate (unsaturated)
+        rate = saturate(rate, minRate, maxRate)                     ! Saturate the signal rate
         ratelimit = inputSignalPrev + rate*DT                       ! Saturate the overall command using the rate limit
 
     END FUNCTION ratelimit
@@ -131,8 +131,8 @@ CONTAINS
         REAL(8)                         :: PTerm                                        ! Proportional term
         REAL(8), DIMENSION(99), SAVE    :: ITerm = (/ (real(9999.9), i = 1,99) /)       ! Integral term, current.
         REAL(8), DIMENSION(99), SAVE    :: ITermLast = (/ (real(9999.9), i = 1,99) /)   ! Integral term, the last time this controller was called. Supports 99 separate instances.
-        REAL(8), DIMENSION(99), SAVE    :: ITerm2 = (/ (real(9999.9), i = 1,99) /)       ! Second Integral term, current.
-        REAL(8), DIMENSION(99), SAVE    :: ITermLast2 = (/ (real(9999.9), i = 1,99) /)   ! Second Integral term, the last time this controller was called. Supports 99 separate instances.
+        REAL(8), DIMENSION(99), SAVE    :: ITerm2 = (/ (real(9999.9), i = 1,99) /)      ! Second Integral term, current.
+        REAL(8), DIMENSION(99), SAVE    :: ITermLast2 = (/ (real(9999.9), i = 1,99) /)  ! Second Integral term, the last time this controller was called. Supports 99 separate instances.
         INTEGER(4), DIMENSION(99), SAVE :: FirstCall = (/ (1, i=1,99) /)                ! First call of this function?
         
         ! Initialize persistent variables/arrays, and set inital condition for integrator term
@@ -251,9 +251,9 @@ CONTAINS
         INTEGER(4)                              :: j            ! Iteration index & query index, y-direction
         INTEGER(4)                              :: jj           ! Iteration index & second query index, y-direction
         REAL(8), DIMENSION(2,2)                 :: fQ           ! zData value at query points for bilinear interpolation            
-        REAL(8), DIMENSION(1)                   :: fxy           ! Interpolated z-data point to be returned
-        REAL(8)                                 :: fxy1          ! zData value at query point for bilinear interpolation
-        REAL(8)                                 :: fxy2          ! zData value at query point for bilinear interpolation       
+        REAL(8), DIMENSION(1)                   :: fxy          ! Interpolated z-data point to be returned
+        REAL(8)                                 :: fxy1         ! zData value at query point for bilinear interpolation
+        REAL(8)                                 :: fxy2         ! zData value at query point for bilinear interpolation       
         LOGICAL                                 :: edge     
 
         ! Error Catching
@@ -455,9 +455,9 @@ CONTAINS
         ! Inputs
         REAL(8), INTENT(IN)     :: rootMOOP(3)                      ! Root out of plane bending moments of each blade
         REAL(8), INTENT(IN)     :: aziAngle                         ! Rotor azimuth angle
-        INTEGER(4), INTENT(IN)  :: nHarmonic                        ! The harmonic number, nP
+        INTEGER(8), INTENT(IN)  :: nHarmonic                        ! The harmonic number, nP
         ! Outputs
-        REAL(8), INTENT(OUT)    :: axTOut, axYOut               ! Direct axis and quadrature axis outputted by this transform
+        REAL(8), INTENT(OUT)    :: axTOut, axYOut                   ! Direct axis and quadrature axis outputted by this transform
         ! Local
         REAL(8), PARAMETER      :: phi2 = 2.0/3.0*PI                ! Phase difference from first to second blade
         REAL(8), PARAMETER      :: phi3 = 4.0/3.0*PI                ! Phase difference from first to third blade
@@ -474,10 +474,10 @@ CONTAINS
     ! back to root out of plane bending moments of each turbine blade
         IMPLICIT NONE
         ! Inputs
-        REAL(8), INTENT(IN)     :: axTIn, axYIn         ! Direct axis and quadrature axis
+        REAL(8), INTENT(IN)     :: axTIn, axYIn                 ! Direct axis and quadrature axis
         REAL(8), INTENT(IN)     :: aziAngle                     ! Rotor azimuth angle
         REAL(8), INTENT(IN)     :: aziOffset                    ! Phase shift added to the azimuth angle
-        INTEGER(4), INTENT(IN)  :: nHarmonic                    ! The harmonic number, nP
+        INTEGER(8), INTENT(IN)  :: nHarmonic                    ! The harmonic number, nP
         ! Outputs
         REAL(8), INTENT(OUT)    :: PitComIPC(3)                 ! Root out of plane bending moments of each blade
         ! Local
@@ -492,7 +492,7 @@ CONTAINS
     END SUBROUTINE ColemanTransformInverse
 
 !-------------------------------------------------------------------------------------------------------------------------------
-    REAL FUNCTION CPfunction(CP, lambda)
+    REAL(8) FUNCTION CPFunction(CP, lambda)
     ! Paremeterized Cp(lambda) function for a fixed pitch angle. Circumvents the need of importing a look-up table
         IMPLICIT NONE
         
@@ -504,7 +504,7 @@ CONTAINS
         CPfunction = exp(-CP(1)/lambda)*(CP(2)/lambda-CP(3))+CP(4)*lambda
         CPfunction = saturate(CPfunction, 0.001D0, 1.0D0)
         
-    END FUNCTION CPfunction
+    END FUNCTION CPFunction
 
 !-------------------------------------------------------------------------------------------------------------------------------
     REAL FUNCTION AeroDynTorque(LocalVar, CntrPar, PerfData, ErrVar)
@@ -557,14 +557,14 @@ CONTAINS
         TYPE(DebugVariables), INTENT(IN)        :: DebugVar
     
         INTEGER(4), INTENT(IN)                      :: size_avcOUTNAME
-        INTEGER(4)                                  :: I , nDebugOuts               ! Generic index.
-        CHARACTER(1), PARAMETER                     :: Tab = CHAR(9)                        ! The tab character.
+        INTEGER(4)                                  :: I , nDebugOuts                             ! Generic index.
+        CHARACTER(1), PARAMETER                     :: Tab = CHAR(9)                              ! The tab character.
         CHARACTER(29), PARAMETER                    :: FmtDat = "(F10.3,TR5,99(ES10.3E2,TR5:))"   ! The format of the debugging data
-        INTEGER(4), PARAMETER                       :: UnDb = 85        ! I/O unit for the debugging information
-        INTEGER(4), PARAMETER                       :: UnDb2 = 86       ! I/O unit for the debugging information, avrSWAP
-        REAL(C_FLOAT), INTENT(INOUT)                :: avrSWAP(*)   ! The swap array, used to pass data to, and receive data from, the DLL controller.
-        CHARACTER(size_avcOUTNAME-1), INTENT(IN)    :: RootName     ! a Fortran version of the input C string (not considered an array here)    [subtract 1 for the C null-character]
-        CHARACTER(200)                              :: Version      ! git version of ROSCO
+        INTEGER(4), PARAMETER                       :: UnDb = 85                                   ! I/O unit for the debugging information
+        INTEGER(4), PARAMETER                       :: UnDb2 = 86                                  ! I/O unit for the debugging information, avrSWAP
+        REAL(C_FLOAT), INTENT(INOUT)                :: avrSWAP(*)                                  ! The swap array, used to pass data to, and receive data from, the DLL controller.
+        CHARACTER(size_avcOUTNAME-1), INTENT(IN)    :: RootName                                    ! a Fortran version of the input C string (not considered an array here)    [subtract 1 for the C null-character]
+        CHARACTER(200)                              :: Version                                     ! git version of ROSCO
         CHARACTER(10)                               :: DebugOutStr1,  DebugOutStr2, DebugOutStr3, DebugOutStr4, DebugOutStr5, &
                                                          DebugOutStr6, DebugOutStr7, DebugOutStr8, DebugOutStr9, DebugOutStr10, &
                                                          DebugOutStr11, DebugOutStr12, DebugOutStr13, DebugOutStr14, DebugOutStr15, & 
