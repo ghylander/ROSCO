@@ -16,10 +16,14 @@ if(APPLE OR UNIX)
   else()
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DIMPLICIT_DLLEXPORT -ffree-line-length-0 -fdefault-real-8 -fdefault-double-8 -cpp")
   endif()
-elseif(WIN32)
-  # Ensure static linking to avoid requiring Fortran runtime dependencies
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-0 -static-libgcc -static-libgfortran -static  -fdefault-real-8 -fdefault-double-8 -cpp")
-#     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} /static-libgcc /static-libgfortran /static  /fdefault-real-8 /fdefault-double-8 /cpp")
+elseif (WIN32)
+  if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    # Ensure static linking to avoid requiring Fortran runtime dependencies
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-0 -static-libgcc -static-libgfortran -static -fdefault-real-8 -fdefault-double-8 -cpp")
+  elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -static -fpp -real-size:64")
+#     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} /ffree-line-length-0 /static-libgcc /static-libgfortran /static /fdefault-real-8 /fdefault-double-8 /cpp")
+  endif()
 endif()
 
 
