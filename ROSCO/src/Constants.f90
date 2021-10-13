@@ -17,5 +17,5 @@ MODULE Constants
     REAL(8), PARAMETER          :: PI = 3.1415926                       ! Mathematical constant pi
     INTEGER(8), PARAMETER       :: NP_1 = 1                             ! First rotational harmonic
     INTEGER(8), PARAMETER       :: NP_2 = 2                             ! Second rotational harmonic
-    CHARACTER(*),  PARAMETER      :: NewLine     = ACHAR(10)                         ! The delimiter for New Lines [ Windows is CHAR(13)//CHAR(10); MAC is CHAR(13); Unix is CHAR(10) {CHAR(13)=\r is a line feed, CHAR(10)=\n is a new line}]
+    CHARACTER(*),  PARAMETER    :: NewLine     = ACHAR(10)                         ! The delimiter for New Lines [ Windows is CHAR(13)//CHAR(10); MAC is CHAR(13); Unix is CHAR(10) {CHAR(13)=\r is a line feed, CHAR(10)=\n is a new line}]
 END MODULE Constants
